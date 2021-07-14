@@ -5,7 +5,7 @@ export const MainGrid = styled.main`
   grid-gap: 0.52vw;
   margin-left: auto;
   margin-right: auto;
-  max-width: 26.04vw;
+  max-width: 600px;
   padding: 0.83vw;
   .profileArea {
     display: none;
