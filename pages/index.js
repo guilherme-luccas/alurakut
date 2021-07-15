@@ -66,6 +66,24 @@ export default function Home() {
       .then((respostaCompleta) => {
         setSeguidores(respostaCompleta);
       });
+
+    //fetch pro dato
+    fetch("https://graphql.datocms.com/", {
+      method: "POST",
+      headers: {
+        Authorization: "2c3994e34aa7c487693c17a52d387d",
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        query: `{ allComunidades { title id image creatorSlug } }`,
+      }),
+    })
+      .then((response) => response.json())
+      .then((respostaCompleta) => {
+        const comunidadesDato = respostaCompleta.data.allComunidades;
+        setComunidades(comunidadesDato);
+      });
   }, []);
   return (
     <>
@@ -87,14 +105,24 @@ export default function Home() {
                 const dadosDoForm = new FormData(e.target);
 
                 const comunidade = {
-                  id: new Date().toISOString(),
                   title: dadosDoForm.get("title"),
                   image: dadosDoForm.get("image"),
+                  creatorSlug: "guilherme",
                 };
 
-                const comunidadesAtualizadas = [...comunidades, comunidade];
-                setComunidades(comunidadesAtualizadas);
-                e.target.reset();
+                fetch("/api/comunidades", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(comunidade),
+                }).then(async (response) => {
+                  const dados = await response.json();
+                  const comunidade = dados.registroCriado;
+                  const comunidadesAtualizadas = [...comunidades, comunidade];
+                  setComunidades(comunidadesAtualizadas);
+                  e.target.reset();
+                });
               }}
             >
               <div>
@@ -122,30 +150,14 @@ export default function Home() {
           style={{ gridArea: "profileRelationsArea" }}
         >
           <ProfileRelationsBox title="Seguidores" item={seguidores} />
+
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">Comunidades ({comunidades.length})</h2>
-            <ul>
-              {pessoasFavoritas.map((pessoa) => {
-                return (
-                  <li key={pessoa}>
-                    <a href={`/users/${pessoa}`}>
-                      <img src={`https://github.com/${pessoa}.png`} />
-                      <span>{pessoa}</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da comunidades ({comunidades.length})
-            </h2>
             <ul>
               {comunidades.map((comunidade) => {
                 return (
                   <li key={comunidade.id}>
-                    <a href={`/users/${comunidade.title}`}>
+                    <a href={`/comunidade/${comunidade.id}`}>
                       <img src={comunidade.image} />
                       <span>{comunidade.title}</span>
                     </a>
