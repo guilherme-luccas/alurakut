@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import nookies from "nookies";
+import jwt from "jsonwebtoken";
 
 import { MainGrid } from "../src/components/MainGrid";
 import { Box } from "../src/components/Box";
@@ -52,8 +54,8 @@ function ProfileRelationsBox({ title, item }) {
   );
 }
 
-export default function Home() {
-  const githubUser = "guilherme-luccas";
+export default function Home(props) {
+  const user = props.githubUser;
   const [comunidades, setComunidades] = useState([]);
   const pessoasFavoritas = ["juunegreiros", "omariosouto", "rafaballerini"];
   const [seguidores, setSeguidores] = useState([]);
@@ -87,10 +89,10 @@ export default function Home() {
   }, []);
   return (
     <>
-      <AlurakutMenu githubUser={githubUser} />
+      <AlurakutMenu githubUser={user} />
       <MainGrid>
         <div className="profileArea" style={{ gridArea: "profileArea" }}>
-          <ProfileSideBar githubUser={githubUser} />
+          <ProfileSideBar githubUser={user} />
         </div>
         <div className="welcomeArea" style={{ gridArea: "welcomeArea" }}>
           <Box>
@@ -170,4 +172,16 @@ export default function Home() {
       </MainGrid>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const cookies = nookies.get(context);
+  const token = cookies.USER_TOKEN;
+  const { githubUser } = jwt.decode(token);
+
+  return {
+    props: {
+      githubUser: githubUser,
+    }, // will be passed to the page component as props
+  };
 }
